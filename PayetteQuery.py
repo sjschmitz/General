@@ -1,3 +1,8 @@
+#---------------------------------------------------------------------------#
+#This code retrieves data from NWIS, servers that host USGS gage streamflow #
+#information, to populate a graph with recent water levels of the North Fk. #
+#of the Payette River                                                       #
+#---------------------------------------------------------------------------#
 
 import dataretrieval.nwis as nwis
 import pandas as pd
@@ -5,7 +10,7 @@ from datetime import datetime as datetime
 from datetime import date
 import matplotlib.pyplot as plt
 
-site = '13246000' #North Fork at Banks, ID
+site = '13246000' #North Fork at Banks, ID site ID
 today = date.today()
 instant_values = []
 
