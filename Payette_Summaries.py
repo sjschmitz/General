@@ -12,6 +12,13 @@ NFk_id, MFk_id, SFk_id, MainFk_id = '13246000','13237920','13235000','13247500' 
 today = datetime.now()
 today = today.strftime("%Y-%m-%d")
 
+#########################################################################
+#Inefficient way to import 4 large datasets, should only download these when queried?
+#could be memory problem
+#pandas ValueError: You are trying to merge on object and datetime64[ns] columns
+#occurs when date ranges for @start get too broad
+###########################################################################
+
 df_nf, md_nf = nwis.get_iv(sites=NFk_id,start='2023-05-01',end=today,multi_index=True,wide_format=True)
 df_mf, md_mf = nwis.get_iv(sites=MFk_id,start='2023-05-01',end=today,multi_index=True,wide_format=True)
 df_sf, md_sf = nwis.get_iv(sites=SFk_id,start='2023-05-01',end=today,multi_index=True,wide_format=True)
@@ -25,6 +32,11 @@ for df in dataframes:
 #Summary Statistics #
 #-------------------#
 err_msg = 'problem calculating function'
+
+#########################
+#potentially design these to use get_iv when
+#called?
+#########################
 
 def year_avg(df) -> float:
     avg_unformat = df['cfs'].mean() 
