@@ -1,4 +1,3 @@
-
 import dataretrieval.nwis as nwis
 import time as time
 import pandas as pd
@@ -7,36 +6,34 @@ from datetime import timedelta
 from datetime import date
 import matplotlib.pyplot as plt
 import numpy as np
+from dateutil import parser as parser
 
-NFk_id, MFk_id, SFk_id, MainFk_id = '13246000','13237920','13235000','13247500' #USGS Site ID numbers
+NFk, MFk, SFk, MainFk = '13246000','13237920','13235000','13247500' #USGS Site ID numbers
 today = datetime.now()
 today = today.strftime("%Y-%m-%d")
 
-#########################################################################
-#Inefficient way to import 4 large datasets, should only download these when queried?
-#could be memory problem
-#pandas ValueError: You are trying to merge on object and datetime64[ns] columns
-#occurs when date ranges for @start get too broad
-###########################################################################
-
-df_nf, md_nf = nwis.get_iv(sites=NFk_id,start='2023-05-01',end=today,multi_index=True,wide_format=True)
-df_mf, md_mf = nwis.get_iv(sites=MFk_id,start='2023-05-01',end=today,multi_index=True,wide_format=True)
-df_sf, md_sf = nwis.get_iv(sites=SFk_id,start='2023-05-01',end=today,multi_index=True,wide_format=True)
-df_main, md_main = nwis.get_iv(sites=MainFk_id,start='2023-05-01',end=today,multi_index=True,wide_format=True)
-
-dataframes = [df_nf, df_mf, df_sf, df_main] #increase readability with column rename
-for df in dataframes:
-    df.rename(columns={'00060': 'cfs'}, inplace=True)
+def load_data(site_id) -> pd.DataFrame:
+    global df
+    format = '%Y-%m-%d'
+    print('For sizing parameters, flow information will only be loaded back to 2023-04-01\n')
+    err_msg = "Unable to read input dates - check spelling and format and retry"
+    end = input("Input end date in YYYY-MM-DD format: ")
+    res = True
+    try:
+        res = bool(parser.parse(end))
+    except ValueError:
+        print(err_msg) 
+        end = input("Input end date in YYYY-MM-DD format: ")
+    print('Loading Dataset...')
+    df, md = nwis.get_iv(sites=site_id,start='2023-04-01',end=end,multi_index=True,wide_format=True)
+    assert df.empty is False,err_msg
+    df.rename(columns={'00060':'cfs'},inplace=True)
+    print('Load Complete. Your Pandas Dataset is assigned to variable "df"')
 
 #-------------------#
 #Summary Statistics #
 #-------------------#
 err_msg = 'problem calculating function'
-
-#########################
-#potentially design these to use get_iv when
-#called?
-#########################
 
 def year_avg(df) -> float:
     avg_unformat = df['cfs'].mean() 
@@ -104,3 +101,19 @@ def daily_avg(site_id):
         year_counter += 1
     print('\n')
     print(f'The decade average for {end_date.strftime("%Y-%m-%d")} is {int(sum(dfs)/len(dfs))} cfs!')
+
+print("Welcome to the Payette Summary Toolset!\nWritten by: Steven Schmitz")
+print('\n' * 1)
+print('\033[1m' + "Variable Names for Site ID's" + '\033[0m')
+print("NFk : North Fork of the Payette River\nMFk : Middle Fork of the Payette River\nSFk : South Fork of the Payette River\nMainFk : Main Fork of the Payette River")
+print('\n' * 1)
+time.sleep(1)
+def Toolset():
+    print('\033[1m' + "Toolset" + '\033[0m')
+    print('type Toolset() into consule to get list of functions available\n')
+    print('load_data(var) : loads streamflow information from NWIS server | var = variable name for site_id')
+    print('year_avg(var): returns average flow in cfs during timeframe of loaded dataset | var = pandas dataframe of loaded data; df')
+    print('find_peak(var): returns peak minimum and maximum flows during timeframe of dataset | var = pandas dataframe of loaded data; df')
+    print('find_peak_avg(var): returns date window where 50% of flow peaks occur | var = variable name for site_id')
+    print('daily_avg(var): compares daily average of given date from 2013 to date | var = variable name for site_id')
+Toolset()
