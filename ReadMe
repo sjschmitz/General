@@ -1,4 +1,5 @@
 Payette_Summaries.py is a suite of tools used to get summary statistics of Payette river stream gages as well as create graphical constructs of yearly flows, averages, peaks, and more.
+
 This script uses external packages:
   dataretrieval.nwis    | https://github.com/DOI-USGS/dataretrieval-python
   numpy                 | https://numpy.org/
